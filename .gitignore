@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# for Macs
+**/.DS_Store
+
+# ignoring large data files
+*.csv
+*.json
+
+/unused-spiders
