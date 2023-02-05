@@ -6,6 +6,9 @@ import json
 class ZoocasaSpider(scrapy.Spider):
     name = 'zoocasa'
     allowed_domains = ['www.zoocasa.com']
+    # status = "available"
+    status = "not-available-sold"
+
     headers={
         'content-type' : 'application/json',
         'user-agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
@@ -19,10 +22,11 @@ class ZoocasaSpider(scrapy.Spider):
         'connection': 'keep-alive',
         'cache-control': 'no-cache'
     }
+
     payload = {
                 "filter": {
                     "rental": False,
-                    "status": "available",
+                    "status": status,
                     "slug": "toronto-on",
                     "latitude": 43.653226,
                     "longitude": -79.3831843,
@@ -96,7 +100,6 @@ class ZoocasaSpider(scrapy.Spider):
                     'bedrooms' : listing_att['bedrooms'],
                     'bedrooms_partial' : listing_att['bedrooms-partial'],
                     'bathrooms' : listing_att['bathrooms'],
-                    'bathrooms_partial' : listing_att['bathrooms-partial'],
                     'square_footage_min' : square_footage.get('min'),
                     'square_footage_max' : square_footage.get('max'),
                     'unit' : listing_att['unit-number'],
@@ -108,8 +111,8 @@ class ZoocasaSpider(scrapy.Spider):
                     'lon' : listing_att['position']['coordinates'][0],
                 }
 
-                yield response.follow(
-                    url=listing_att['address-path'],
+                yield scrapy.Request(
+                    url=f"https://www.zoocasa.com/_next/data/pd6Zrt9tUNjay5FTf5hye/address{listing_att['address-path']}.json",
                     headers=self.headers,
                     meta={'listing_meta' : listing_meta},
                     callback=self.parse_listing
@@ -128,14 +131,19 @@ class ZoocasaSpider(scrapy.Spider):
             )
 
     def parse_listing(self, response):
-        res_json = json.loads(
-            response.xpath('//*[@id="__NEXT_DATA__"]/text()').get()
-        )['props']['pageProps']['props']['listingData']
+        res_json = json.loads(response.body)['pageProps']['props']['listingData']
 
         listing = response.request.meta['listing_meta']
 
+        listing['sold_price'] = res_json['soldPrice']
+        listing['sold_at'] = res_json['soldAt']
         listing['type'] = res_json['type']
-        listing['garage_type'] = res_json['garage']
+        listing['pool'] = res_json['pool']
+        listing['heating'] = res_json['heat']
+        listing['heating_fuel'] = res_json['heatingFuel']
+        listing['lot_frontage'] = res_json['lotFrontage']
+        listing['lot_depth'] = res_json['lotDepth']
+        listing['ac'] = res_json['ac']
         listing['brokerage'] = res_json['brokerage']
         listing['neighbourhood'] = res_json['neighbourhoodName']
         listing['neighbourhood_id'] = res_json['neighbourhood']['id']
@@ -145,6 +153,8 @@ class ZoocasaSpider(scrapy.Spider):
         listing['features'] = res_json['extras']
         listing['levels'] = res_json['levels']
         listing['rooms_total'] = len(res_json['rooms'])
+        listing['rooms_total'] = len(res_json['rooms'])
+        listing['rooms_dimensions'] = res_json['rooms']
         listing['desc'] = res_json['description']
         listing['mls_num'] = res_json['mlsNum']
 
