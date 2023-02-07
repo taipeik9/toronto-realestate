@@ -25,6 +25,23 @@ Scraping Stats:
 - 139 POST Reqs
 - 3857 GET Reqs
 
+Scraping Stats v2 (Available):
+- No Download Delay
+- ~10.5 min to scrape (On Brainstation Wifi)
+- 4003 items
+- 1 500 Internal Server Error
+- 145 POST Reqs
+- 4006 GET Reqs
+
+Scraping Stats v2 (Sold):
+- No Download Delay
+- ~71 min to scrape
+- 24195 items
+- 16 Timeout Server Errors
+- 9 500 Internal Server Error
+- 869 POST Reqs
+- 24220 GET Reqs
+
 ## Realtor.ca
 
 This site had a lot of protections from bots and scrapers. The actual site couldn't be sent any requests without JS enabled with being intercepted by Incapsula. So a lot of workarounds had to be used so that the scraper was only using Realtor.ca's API. This actually made the scraper a lot faster, due to working solely with JSON reqs.
