@@ -8,6 +8,8 @@ class ZoocasaSpider(scrapy.Spider):
     allowed_domains = ['www.zoocasa.com']
     # status = "available"
     status = "not-available-sold"
+    slug = "toronto-on"
+    complex_scrape = False
 
     headers={
         'content-type' : 'application/json',
@@ -27,9 +29,7 @@ class ZoocasaSpider(scrapy.Spider):
                 "filter": {
                     "rental": False,
                     "status": status,
-                    "slug": "toronto-on",
-                    "latitude": 43.653226,
-                    "longitude": -79.3831843,
+                    "slug": slug,
                     "zoom": 14,
                     "home-type": {
                         "house-detached": True,
@@ -65,17 +65,25 @@ class ZoocasaSpider(scrapy.Spider):
                             "maintenance-fee": None
                         }
                     },
-                    "area-name": "Toronto",
                     "boundary": None
                 },
                 "page": {
                     "number": 1,
-                    "size": 28
+                    "size": 250
                 },
                 "sort": "-date"
             }
 
     def start_requests(self):
+        yield scrapy.Request(
+            url='https://www.zoocasa.com/toronto-on-real-estate',
+            headers=self.headers,
+            callback=self.get_listings
+        )
+
+    def get_listings(self, response):
+        self.next_data = response.xpath('/html/head/script[39]').get().split('/')[3]
+
         yield scrapy.Request(url="https://www.zoocasa.com/services/api/v3/listings",
             method='POST',
             body=json.dumps(self.payload),
@@ -104,19 +112,25 @@ class ZoocasaSpider(scrapy.Spider):
                     'square_footage_max' : square_footage.get('max'),
                     'unit' : listing_att['unit-number'],
                     'parking' : listing_att['parking'],
+                    'style' : listing_att['style-name'],
                     'city' : listing_att['city'],
                     'province' : listing_att['province'],
                     'added_at' : listing_att['added-at'],
                     'lat' : listing_att['position']['coordinates'][1],
                     'lon' : listing_att['position']['coordinates'][0],
+                    'sold_price' : listing_att['sold-price'],
+                    'sold_at' : listing_att['sold-at']
                 }
 
-                yield scrapy.Request(
-                    url=f"https://www.zoocasa.com/_next/data/pd6Zrt9tUNjay5FTf5hye/address{listing_att['address-path']}.json",
-                    headers=self.headers,
-                    meta={'listing_meta' : listing_meta},
-                    callback=self.parse_listing
-                )
+                if self.complex_scrape:
+                    yield scrapy.Request(
+                        url=f"https://www.zoocasa.com/_next/data/{self.next_data}/address{listing_att['address-path']}.json",
+                        headers=self.headers,
+                        meta={'listing_meta' : listing_meta},
+                        callback=self.parse_listing
+                    )
+                else:
+                    yield listing_meta
 
 
             next_page = response_meta['page-number'] + 1
@@ -135,8 +149,6 @@ class ZoocasaSpider(scrapy.Spider):
 
         listing = response.request.meta['listing_meta']
 
-        listing['sold_price'] = res_json['soldPrice']
-        listing['sold_at'] = res_json['soldAt']
         listing['type'] = res_json['type']
         listing['pool'] = res_json['pool']
         listing['heating'] = res_json['heat']
@@ -146,16 +158,17 @@ class ZoocasaSpider(scrapy.Spider):
         listing['ac'] = res_json['ac']
         listing['brokerage'] = res_json['brokerage']
         listing['neighbourhood'] = res_json['neighbourhoodName']
-        listing['neighbourhood_id'] = res_json['neighbourhood']['id']
+        listing['neighbourhood_id'] = res_json['neighbourhood']['id'] if res_json['neighbourhood'] != None else None
         listing['exterior'] = res_json['exterior']
         listing['driveway_type'] = res_json['driveway']
         listing['basement_type'] = res_json['basement']
+        listing['garage'] = res_json['garage']
         listing['features'] = res_json['extras']
         listing['levels'] = res_json['levels']
         listing['rooms_total'] = len(res_json['rooms'])
-        listing['rooms_total'] = len(res_json['rooms'])
-        listing['rooms_dimensions'] = res_json['rooms']
+        listing['room_dimensions_obj'] = res_json['rooms']
         listing['desc'] = res_json['description']
+        listing['misc_obj'] = res_json['misc']
         listing['mls_num'] = res_json['mlsNum']
 
         yield listing

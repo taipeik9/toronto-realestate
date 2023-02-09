@@ -25,6 +25,7 @@ Scraping Stats:
 - 139 POST Reqs
 - 3857 GET Reqs
 
+Complex Stats:
 Scraping Stats v2 (Available):
 - No Download Delay
 - ~10.5 min to scrape (On Brainstation Wifi)
@@ -41,6 +42,13 @@ Scraping Stats v2 (Sold):
 - 9 500 Internal Server Error
 - 869 POST Reqs
 - 24220 GET Reqs
+
+Not Complex:
+Scraping Stats v2 (Available):
+- No Download Delay
+- ~38s to scrape
+- 4067 items
+- 18 POST Reqs
 
 ## Realtor.ca
 
