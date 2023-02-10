@@ -134,6 +134,7 @@ dmypy.json
 # ignoring large data files
 *.csv
 *.json
+*.geojson
 
 /unused-spiders
 *.txt
