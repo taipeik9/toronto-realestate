@@ -1,9 +1,11 @@
 # toronto-realestate
-Analysis and future analytics on the Toronto Real Estate Market using python, Linear Regression analysis and webscrapers
+Analysis and analytics on the Toronto Real Estate Market using python, Regression modeling and webscrapers
 
-## Analysis
+The full analysis on the scraped data and model creation are in the toronto-realestate.ipynb
 
-All of the data analysis and model creation are in the toronto-realestate.ipynb
+## Summary of Analysis
+
+
 
 Attempted Data Sources:
 

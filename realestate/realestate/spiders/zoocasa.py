@@ -6,10 +6,10 @@ import json
 class ZoocasaSpider(scrapy.Spider):
     name = 'zoocasa'
     allowed_domains = ['www.zoocasa.com']
-    # status = "available"
-    status = "not-available-sold"
+    # status = "available" # scrape all active listings
+    status = "not-available-sold" # scrape all sold listings
     slug = "toronto-on"
-    complex_scrape = False
+    complex_scrape = False # Change this to True if you want extra fields on each listing. This will take longer to scrape.
 
     headers={
         'content-type' : 'application/json',
@@ -17,7 +17,6 @@ class ZoocasaSpider(scrapy.Spider):
         'x-zoocasa-generation' : 'next',
         'x-zoocasa-request-source' : 'zoocasa.com',
         'accept': '*/*',
-        'accept-encoding': 'gzip, deflate, br',
         'accept-language': 'en-US,en;q=0.9',
         'referer': 'https://www.zoocasa.com/toronto-on-real-estate',
         'origin': 'https://www.zoocasa.com',
@@ -82,7 +81,7 @@ class ZoocasaSpider(scrapy.Spider):
         )
 
     def get_listings(self, response):
-        self.next_data = response.xpath('/html/head/script[39]').get().split('/')[3]
+        self.next_data = json.loads(response.xpath('//script[@id="__NEXT_DATA__"]/text()').get())['buildId']
 
         yield scrapy.Request(url="https://www.zoocasa.com/services/api/v3/listings",
             method='POST',

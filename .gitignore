@@ -137,4 +137,3 @@ dmypy.json
 *.geojson
 
 /unused-spiders
-*.txt
