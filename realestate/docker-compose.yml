@@ -5,6 +5,6 @@ services:
       context: .
       dockerfile: Dockerfile
     image: zoocasa-scraper
-    command: "scrapy crawl zoocasa"
+    command: "scrapy crawl zoocasa -o 'scraped-data.csv'"
     volumes:
       - .:/app
