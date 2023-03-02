@@ -1,4 +1,4 @@
-# toronto-realestate
+# Toronto Realestate Scraping and Analysis
 Analysis and analytics on the Toronto Real Estate Market using python, Regression modeling and webscrapers
 
 ## Included in this README:
